@@ -1,10 +1,19 @@
 from closer import Closer
 from unittest import TestCase
-from unittest.mock import mock_open, patch
+from unittest.mock import patch
+from configparser import ConfigParser
 
 class TestCloser(TestCase):
-    SAMPLE_CFG = "[jira]\nurl = https://jira.test.com\n"
-    @patch('builtins.open', mock_open(read_data=SAMPLE_CFG))
+    def setUp(self):
+        self.config_filename = 'test.cfg'
+        self.config = ConfigParser()
+
+    def write_config(self):
+        with open(self.config_filename, 'w') as configfile:
+            self.config.write(configfile)
+
     def test_config_basic(self):
-        closer = Closer()
+        self.config['jira'] = {'url': 'https://jira.test.com'}
+        self.write_config()
+        closer = Closer(self.config_filename)
         self.assertEqual(closer.jira_url, 'https://jira.test.com')
